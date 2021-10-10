@@ -25,7 +25,7 @@ class StudyTest {
 //        );
 //    }
 
-    @Test
+    @FastTest
     @DisplayName("스터디 만들기") // 권장
     void create_new_study() {
         // 조건별 실행
@@ -38,7 +38,7 @@ class StudyTest {
         assertThat(actual.getLimit()).isGreaterThan(0);
     }
 
-    @Test
+    @SlowTest
     @DisplayName("스터디 만들기 🤔")
 //    @Disabled // Test 실행 안하게 하는 어노테이션
     void create_new_study_again() {
