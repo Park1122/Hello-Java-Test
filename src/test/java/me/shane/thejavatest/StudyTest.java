@@ -1,6 +1,14 @@
 package me.shane.thejavatest;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.converter.ArgumentConversionException;
+import org.junit.jupiter.params.converter.ConvertWith;
+import org.junit.jupiter.params.converter.SimpleArgumentConverter;
+import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,6 +32,32 @@ class StudyTest {
 //                () -> assertTrue(study.getLimit() > 0)
 //        );
 //    }
+
+    @DisplayName("변수 테스트")
+    @ParameterizedTest(name = "{index} {displayName} message={0}")
+    @ValueSource(strings = {"날씨가", "많이", "추워지고", "있네요"}) // 배열길이 만큼 반복하면서 인자로 전달
+    @EmptySource // 비워져 있는 값을 파라미터로 전달
+    @NullSource // null을 넣어줌
+//    @NullAndEmptySource -> @EmptySource + @NullSource
+    void parameterizedTest(String message) {
+        System.out.println(message);
+    }
+
+    @DisplayName("암묵적 변수 변환 테스트")
+    @ParameterizedTest(name = "{index} {displayName} message={0}")
+    @ValueSource(ints = {10, 20 ,30}) // 숫자를 Study 타입으로 변환하고자 함
+    void parameterizedTest(@ConvertWith(StudyConverter.class) Study study) { // 하단에서 SimpleArgumentConverter를 상속받은 구현체를 이용하여 int -> Study로 타입 변환
+        System.out.println(study.getLimit());
+    }
+
+    static class StudyConverter extends SimpleArgumentConverter { // 하나의 인자를 변환해줌
+        @Override
+        protected Object convert(Object source, Class<?> targetType) throws ArgumentConversionException {
+            assertEquals(Study.class, targetType, "Can only convert to Study");
+            return new Study(Integer.parseInt(source.toString()));
+        }
+    }
+
 
     @FastTest
     @DisplayName("스터디 만들기") // 권장
