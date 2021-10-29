@@ -1,5 +1,6 @@
 package me.shane.thejavatest;
 
+import me.shane.thejavatest.domain.Study;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.converter.ArgumentConversionException;
@@ -46,7 +47,7 @@ class StudyTest {
     @ParameterizedTest(name = "{index} {displayName} message={0}")
     @ValueSource(ints = {10, 20 ,30}) // 숫자를 Study 타입으로 변환하고자 함
     void parameterizedTest(@ConvertWith(StudyConverter.class) Study study) { // 하단에서 SimpleArgumentConverter를 상속받은 구현체를 이용하여 int -> Study로 타입 변환
-        System.out.println(study.getLimit());
+//        System.out.println(study.getLimit());
     }
 
     static class StudyConverter extends SimpleArgumentConverter { // 하나의 인자를 변환해줌
@@ -68,7 +69,7 @@ class StudyTest {
         assumeTrue("LOCAL".equalsIgnoreCase(test_env));
 
         Study actual = new Study(10);
-        assertThat(actual.getLimit()).isGreaterThan(0);
+//        assertThat(actual.getLimit()).isGreaterThan(0);
     }
 
     @SlowTest
