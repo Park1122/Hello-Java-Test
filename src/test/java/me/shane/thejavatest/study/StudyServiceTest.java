@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
@@ -54,6 +55,7 @@ class StudyServiceTest {
 
     @Test
     void practice() {
+        // Given
         StudyService studyService = new StudyService(memberService, studyRepository);
         Member member = new Member();
         member.setId(1L);
@@ -63,7 +65,28 @@ class StudyServiceTest {
         when(memberService.findById(1L)).thenReturn(Optional.of(member));
         when(studyRepository.save(study)).thenReturn(study);
 
+        // When
         studyService.createNewStudy(1L, study);
+
+        // Then
+        assertEquals(member.getId(), study.getOwnerId());
+    }
+
+    @Test
+    void practice_BDD_style() {
+        // Given
+        StudyService studyService = new StudyService(memberService, studyRepository);
+        Member member = new Member();
+        member.setId(1L);
+        Study study = new Study(10, "Test");
+
+        given(memberService.findById(1L)).willReturn(Optional.of(member));
+        given(studyRepository.save(study)).willReturn(study);
+
+        // When
+        studyService.createNewStudy(1L, study);
+
+        // Then
         assertEquals(member.getId(), study.getOwnerId());
     }
 
