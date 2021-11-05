@@ -3,10 +3,23 @@ package me.shane.thejavatest.study;
 import me.shane.thejavatest.domain.Member;
 import me.shane.thejavatest.domain.Study;
 import me.shane.thejavatest.member.MemberService;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Optional;
 
@@ -16,13 +29,34 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
+@Testcontainers // 하단의 메뉴얼하게 testcontainers를 start, stop한 것을 알아서 해줌
 class StudyServiceTest {
 
     @Mock
     MemberService memberService;
+
     @Mock
     StudyRepository studyRepository;
+
+    @Container // docker testcontainers를 사용하려면 docker가 작동중이어야 함.
+    static PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer().withDatabaseName("studytest");
+
+//    @BeforeAll
+//    static void beforeAll() {
+//        postgreSQLContainer.start();
+//    }
+
+//    @AfterAll
+//    static void afterAll() {
+//        postgreSQLContainer.stop();
+//    }
+
+    @BeforeEach
+    void beforeEach() {
+        studyRepository.deleteAll();
+    }
 
     @Test
     void createStudyService() {
@@ -90,4 +124,12 @@ class StudyServiceTest {
         assertEquals(member.getId(), study.getOwnerId());
     }
 
+    static class ContainerPropertyInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+        @Override
+        public void initialize(ConfigurableApplicationContext context) {
+//            TestPropertyValues.of("container.port=" + composeContainer.getServicePort("study-db", 5432))
+//                    .applyTo(context.getEnvironment());
+        }
+    }
 }
