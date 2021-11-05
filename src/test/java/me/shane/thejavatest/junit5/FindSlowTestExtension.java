@@ -1,4 +1,4 @@
-package me.shane.thejavatest;
+package me.shane.thejavatest.junit5;
 
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;

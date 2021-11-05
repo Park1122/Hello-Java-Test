@@ -1,4 +1,4 @@
-package me.shane.thejavatest;
+package me.shane.thejavatest.junit5;
 
 import me.shane.thejavatest.domain.Study;
 import org.junit.jupiter.api.*;
