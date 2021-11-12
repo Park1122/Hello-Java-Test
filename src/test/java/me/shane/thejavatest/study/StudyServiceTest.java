@@ -1,5 +1,6 @@
 package me.shane.thejavatest.study;
 
+import lombok.extern.slf4j.Slf4j;
 import me.shane.thejavatest.domain.Member;
 import me.shane.thejavatest.domain.Study;
 import me.shane.thejavatest.member.MemberService;
@@ -17,7 +18,9 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -31,6 +34,7 @@ import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 @Testcontainers // 하단의 메뉴얼하게 testcontainers를 start, stop한 것을 알아서 해줌
 class StudyServiceTest {
 
@@ -41,20 +45,21 @@ class StudyServiceTest {
     StudyRepository studyRepository;
 
     @Container // docker testcontainers를 사용하려면 docker가 작동중이어야 함.
-    static PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer().withDatabaseName("studytest");
+    static GenericContainer postgreSQLContainer = new GenericContainer("postgres")
+            .withExposedPorts(5432)
+            .withEnv("POSTGRES_DB", "studytest"); // 사용하지 않는 호스트의 포트가 랜덤하게 선택되어 매핑됨
 
-//    @BeforeAll
-//    static void beforeAll() {
-//        postgreSQLContainer.start();
-//    }
-
-//    @AfterAll
-//    static void afterAll() {
-//        postgreSQLContainer.stop();
-//    }
+    @BeforeAll
+    static void beforeAll() {
+        Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log);
+        postgreSQLContainer.followOutput(logConsumer); // streaming으로 log 확인
+    }
 
     @BeforeEach
     void beforeEach() {
+        System.out.println("==================");
+        System.out.println(postgreSQLContainer.getMappedPort(5432)); // 매핑된 호스트포트를 출력
+        System.out.println(postgreSQLContainer.getLogs()); // 지금까지의 log 몰아서 보기
         studyRepository.deleteAll();
     }
 
