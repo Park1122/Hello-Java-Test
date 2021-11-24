@@ -12,10 +12,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.GenericContainer;
@@ -36,6 +38,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @Slf4j
 @Testcontainers // 하단의 메뉴얼하게 testcontainers를 start, stop한 것을 알아서 해줌
+@ContextConfiguration(initializers = StudyServiceTest.ContainerPropertyInitializer.class)
 class StudyServiceTest {
 
     @Mock
@@ -44,11 +47,16 @@ class StudyServiceTest {
     @Mock
     StudyRepository studyRepository;
 
+//    @Autowired
+//    Environment environment;
+
+    @Value("${container.port}") int port;
+
     @Container // docker testcontainers를 사용하려면 docker가 작동중이어야 함.
     static GenericContainer postgreSQLContainer = new GenericContainer("postgres")
             .withExposedPorts(5432)
-            .withEnv("POSTGRES_DB", "studytest"); // 사용하지 않는 호스트의 포트가 랜덤하게 선택되어 매핑됨
-
+            .withEnv("POSTGRES_DB", "studytest") // 사용하지 않는 호스트의 포트가 랜덤하게 선택되어 매핑됨
+            .withEnv("POSTGRES_HOST_AUTH_METHOD", "trust");
     @BeforeAll
     static void beforeAll() {
         Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log);
@@ -58,7 +66,8 @@ class StudyServiceTest {
     @BeforeEach
     void beforeEach() {
         System.out.println("==================");
-        System.out.println(postgreSQLContainer.getMappedPort(5432)); // 매핑된 호스트포트를 출력
+//        System.out.println(environment.getProperty("container.port")); // 매핑된 호스트포트를 출력
+        System.out.println(port); // 매핑된 호스트포트를 출력
         System.out.println(postgreSQLContainer.getLogs()); // 지금까지의 log 몰아서 보기
         studyRepository.deleteAll();
     }
@@ -133,8 +142,8 @@ class StudyServiceTest {
 
         @Override
         public void initialize(ConfigurableApplicationContext context) {
-//            TestPropertyValues.of("container.port=" + composeContainer.getServicePort("study-db", 5432))
-//                    .applyTo(context.getEnvironment());
+            TestPropertyValues.of("container.port=" + postgreSQLContainer.getMappedPort(5432))
+                    .applyTo(context.getEnvironment());
         }
     }
 }
